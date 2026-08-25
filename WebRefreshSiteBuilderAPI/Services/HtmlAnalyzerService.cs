@@ -17,10 +17,15 @@ public class HtmlAnalyzerService
         _logger = logger;
     }
     
-    public async Task<SiteBuilderApiResultWithPayload<HtmlAnalysisResponse?>> AnalyzeHtmlAsync(HtmlAnalysisRequest request)
+    public async Task<SiteBuilderApiResultWithPayload<HtmlAnalysisResponse>> AnalyzeHtmlAsync(HtmlAnalysisRequest request)
     {
         var prompt = await File.ReadAllTextAsync("Prompts/HtmlExtract.md");
-        
-        
+
+        var response = await _agentService.SendHtmlExtractMessage(prompt, request.Html);
+
+        return SiteBuilderApiResultWithPayload<HtmlAnalysisResponse>.Success(new HtmlAnalysisResponse
+        {
+            Response = response
+        });
     }
 }

@@ -1,9 +1,11 @@
 using Anthropic;
+using Anthropic.Core;
 using ApiBase.AuthenticationAuthorization.Extensions;
 using ApiBase.AuthenticationAuthorization.Options;
 using ApiBase.ExceptionHandling.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using SiteBuilderContracts.Config;
 using WebRefreshSiteBuilderAPI.Services;
 
@@ -63,7 +65,15 @@ public class Program
             .Validate(o => !string.IsNullOrWhiteSpace(o.ApiKey), "Anthropic:ApiKey is missing")
             .ValidateOnStart();
 
-        builder.Services.AddHttpClient<AnthropicClient>();
+        builder.Services.AddSingleton(sp =>
+        {
+            var options = sp.GetRequiredService<IOptions<AnthropicOptions>>().Value;
+            return new AnthropicClient(new ClientOptions
+            {
+                ApiKey = options.ApiKey,
+                BaseUrl = "\"https://api.anthropic.com\""
+            });
+        });
 
         builder.Services.AddScoped<AgentService>();
         builder.Services.AddScoped<HtmlAnalyzerService>();

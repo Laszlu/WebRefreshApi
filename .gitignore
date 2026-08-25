@@ -22,6 +22,7 @@ Debug/
 .env
 
 .idea/
+*.DotSettings.user
 
 *.Development.json
 

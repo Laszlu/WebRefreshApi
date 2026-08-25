@@ -17,8 +17,10 @@ public class AgentService
         _options = options.Value;
     }
 
-    public async Task SendHtmlExtractMessage(string prompt, string sourceHtml)
+    public async Task<string> SendHtmlExtractMessage(string prompt, string sourceHtml)
     {
+        var response = "";
+        
         MessageCreateParams parameters = new MessageCreateParams
         {
             MaxTokens = 1024,
@@ -33,6 +35,17 @@ public class AgentService
             Model = Model.ClaudeSonnet4_6
         };
 
-        //var response = await _anthropicClient.
+        var message = await _anthropicClient.Messages.Create(parameters);
+        
+        foreach (var block in message.Content)
+        {
+            if (block.TryPickText(out var textBlock))
+            {
+                Console.WriteLine(textBlock.Text);
+                response += textBlock.Text;
+            }
+        }
+        
+        return response;
     }
 }
