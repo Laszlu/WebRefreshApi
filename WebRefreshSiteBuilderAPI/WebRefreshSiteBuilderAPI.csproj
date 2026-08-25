@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Anthropic" Version="12.42.0" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\31-07-26\ApiBase\ApiBase.csproj" />
+      <ProjectReference Include="..\SiteBuilderContracts\SiteBuilderContracts.csproj" />
+    </ItemGroup>
+
+    <Target Name="GenerateVersionInfo" BeforeTargets="BeforeBuild">
+        <Exec Command="bash $(ProjectDir)scripts/generate-version.sh" ContinueOnError="WarnAndContinue" />
+    </Target>
+
+    <ItemGroup>
+        <Content Update="version.json" CopyToOutputDirectory="PreserveNewest" Condition="Exists('version.json')" />
+    </ItemGroup>
+    
+</Project>

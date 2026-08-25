@@ -1,0 +1,6 @@
+@WebRefreshSiteBuilderAPI_HostAddress = http://localhost:5068
+
+GET {{WebRefreshSiteBuilderAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

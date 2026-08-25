@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiBase", "..\31-07-26\ApiBase\ApiBase.csproj", "{F102FC2C-1B20-421E-BED1-29EBBE7DA079}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebRefreshSiteBuilderAPI", "WebRefreshSiteBuilderAPI\WebRefreshSiteBuilderAPI.csproj", "{8DF6453B-9276-4328-B35F-E68C0EAA6D8E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SiteBuilderContracts", "SiteBuilderContracts\SiteBuilderContracts.csproj", "{383A5B16-671F-4FD2-93F7-99677ECDCEFC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F102FC2C-1B20-421E-BED1-29EBBE7DA079}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F102FC2C-1B20-421E-BED1-29EBBE7DA079}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F102FC2C-1B20-421E-BED1-29EBBE7DA079}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F102FC2C-1B20-421E-BED1-29EBBE7DA079}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8DF6453B-9276-4328-B35F-E68C0EAA6D8E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DF6453B-9276-4328-B35F-E68C0EAA6D8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DF6453B-9276-4328-B35F-E68C0EAA6D8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DF6453B-9276-4328-B35F-E68C0EAA6D8E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{383A5B16-671F-4FD2-93F7-99677ECDCEFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{383A5B16-671F-4FD2-93F7-99677ECDCEFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{383A5B16-671F-4FD2-93F7-99677ECDCEFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{383A5B16-671F-4FD2-93F7-99677ECDCEFC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
