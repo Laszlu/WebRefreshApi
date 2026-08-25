@@ -19,6 +19,8 @@ bin/
 Release/
 Debug/
 
+.env
+
 .idea/
 
 *.Development.json
