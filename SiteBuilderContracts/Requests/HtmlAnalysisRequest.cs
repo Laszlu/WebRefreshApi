@@ -4,6 +4,11 @@ namespace SiteBuilderContracts.Requests;
 
 public class HtmlAnalysisRequest
 {
-    [Required(ErrorMessage = "Source HTML is required")]
-    public string Html { get; set; }
+    public List<PageInput> Pages { get; set; } = new();
+}
+
+public class PageInput
+{
+    public string Url { get; set; } = string.Empty;   // used for nav-matching and file naming, not fetched
+    public string Html { get; set; } = string.Empty;
 }

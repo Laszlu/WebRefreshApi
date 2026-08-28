@@ -6,7 +6,10 @@ using ApiBase.ExceptionHandling.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using OpenAI;
+using SiteBuilderContracts.Agents;
 using SiteBuilderContracts.Config;
+using WebRefreshSiteBuilderAPI.Agents;
 using WebRefreshSiteBuilderAPI.Services;
 
 namespace WebRefreshSiteBuilderAPI;
@@ -59,24 +62,51 @@ public class Program
             };
         });
         
-        builder.Services
-            .AddOptions<AnthropicOptions>()
+        var provider = builder.Configuration["AgentProvider"];
+        
+        builder.Services.AddOptions<AnthropicOptions>()
             .Bind(builder.Configuration.GetSection(AnthropicOptions.SectionName))
-            .Validate(o => !string.IsNullOrWhiteSpace(o.ApiKey), "Anthropic:ApiKey is missing")
+            .Validate(o => !string.IsNullOrWhiteSpace(o.ExtractModel) && !string.IsNullOrWhiteSpace(o.GenerateModel),
+                "Anthropic ExtractModel and GenerateModel must both be set")
+            .ValidateOnStart();
+        
+        builder.Services.AddOptions<OpenAiOptions>()
+            .Bind(builder.Configuration.GetSection(OpenAiOptions.SectionName))
+            .Validate(o => !string.IsNullOrWhiteSpace(o.ExtractModel) && !string.IsNullOrWhiteSpace(o.GenerateModel),
+                "OpenAi ExtractModel and GenerateModel must both be set")
             .ValidateOnStart();
 
-        builder.Services.AddSingleton(sp =>
+        switch (provider)
         {
-            var options = sp.GetRequiredService<IOptions<AnthropicOptions>>().Value;
-            return new AnthropicClient(new ClientOptions
-            {
-                ApiKey = options.ApiKey,
-                BaseUrl = "\"https://api.anthropic.com\""
-            });
-        });
+            case "Anthropic":
+                builder.Services.AddSingleton(sp =>
+                {
+                    var apiKey = sp.GetRequiredService<IOptions<AnthropicOptions>>().Value.ApiKey;
+                    var clientOptions = new ClientOptions { ApiKey = apiKey };
+                    return new AnthropicClient(clientOptions);
+                });
+                builder.Services.AddScoped<IAgentClient, AnthropicAgentClient>();
+                builder.Services.AddScoped<IAgentModelResolver, AnthropicModelResolver>();
+                break;
+
+            case "OpenAi":
+                builder.Services.AddSingleton(sp =>
+                {
+                    var apiKey = sp.GetRequiredService<IOptions<OpenAiOptions>>().Value.ApiKey;
+                    return new OpenAIClient(apiKey);
+                });
+                builder.Services.AddScoped<IAgentClient, OpenAiAgentClient>();
+                builder.Services.AddScoped<IAgentModelResolver, OpenAiModelResolver>();
+                break;
+
+            default:
+                throw new InvalidOperationException($"Unknown AgentProvider: {provider}");
+        }
 
         builder.Services.AddScoped<AgentService>();
         builder.Services.AddScoped<HtmlAnalyzerService>();
+        builder.Services.AddScoped<HtmlGeneratorService>();
+        builder.Services.AddScoped<QaCheckService>();
 
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddOpenApi();

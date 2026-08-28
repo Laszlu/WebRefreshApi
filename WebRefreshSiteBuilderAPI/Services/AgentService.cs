@@ -1,51 +1,31 @@
 using Anthropic;
 using Anthropic.Models.Messages;
 using Microsoft.Extensions.Options;
+using SiteBuilderContracts.Agents;
 using SiteBuilderContracts.Config;
 
 namespace WebRefreshSiteBuilderAPI.Services;
 
 public class AgentService
 {
-    private readonly AnthropicClient _anthropicClient;
-    
-    private readonly AnthropicOptions _options;
+    private readonly IAgentClient _agentClient;
+    private readonly IAgentModelResolver _modelResolver;
 
-    public AgentService(AnthropicClient anthropicClient, IOptions<AnthropicOptions> options)
+    public AgentService(IAgentClient agentClient, IAgentModelResolver modelResolver)
     {
-        _anthropicClient = anthropicClient;
-        _options = options.Value;
+        _agentClient = agentClient;
+        _modelResolver = modelResolver;
     }
 
-    public async Task<string> SendHtmlExtractMessage(string prompt, string sourceHtml)
+    public Task<string> SendHtmlExtractMessage(string prompt, string sourceHtml, CancellationToken ct = default)
     {
-        var response = "";
-        
-        MessageCreateParams parameters = new MessageCreateParams
-        {
-            MaxTokens = 1024,
-            Messages =
-            [
-                new MessageParam
-                {
-                    Role = Role.User,
-                    Content = prompt + sourceHtml,
-                },
-            ],
-            Model = Model.ClaudeSonnet4_6
-        };
+        var model = _modelResolver.GetModel(AgentStage.Extract);
+        return _agentClient.SendAsync(model, prompt, sourceHtml, ct);
+    }
 
-        var message = await _anthropicClient.Messages.Create(parameters);
-        
-        foreach (var block in message.Content)
-        {
-            if (block.TryPickText(out var textBlock))
-            {
-                Console.WriteLine(textBlock.Text);
-                response += textBlock.Text;
-            }
-        }
-        
-        return response;
+    public Task<string> SendHtmlGenerateMessage(string prompt, string siteSpecJson, CancellationToken ct = default)
+    {
+        var model = _modelResolver.GetModel(AgentStage.Generate);
+        return _agentClient.SendAsync(model, prompt, siteSpecJson, ct);
     }
 }

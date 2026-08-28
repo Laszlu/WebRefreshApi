@@ -14,7 +14,8 @@ public enum SiteBuilderActionResult
     Success = 0,
     NotFound = 1,
     AgentError = 2,
-    HtmlParseError = 3
+    HtmlParseError = 3,
+    RequestContentMissing = 4
 }
 
 public sealed record SiteBuilderApiResult(SiteBuilderActionResult ActionResult, string? ErrorMessage = null)
@@ -43,6 +44,8 @@ public static class SiteBuilderApiResultExtensions
         SiteBuilderActionResult.Success => StatusCodes.Status200OK,
         
         SiteBuilderActionResult.NotFound => StatusCodes.Status404NotFound,
+        
+        SiteBuilderActionResult.RequestContentMissing => StatusCodes.Status400BadRequest,
         
         SiteBuilderActionResult.AgentError 
             or SiteBuilderActionResult.HtmlParseError 
