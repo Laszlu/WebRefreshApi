@@ -1,10 +1,9 @@
-using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using SiteBuilderContracts.Agents;
-using SiteBuilderContracts.Generation;
 using SiteBuilderContracts.Requests;
 using SiteBuilderContracts.Responses;
 using WebRefreshSiteBuilderAPI.Data;
+using WebRefreshSiteBuilderAPI.Helpers;
 
 namespace WebRefreshSiteBuilderAPI.Services;
 
@@ -31,7 +30,7 @@ public class HtmlGeneratorService
         var userContent = siteSpecJson + "\n\n---DESIGN SPEC---\n" + designSpec;
 
         var rawResponse = await _agentService.SendHtmlGenerateMessage(prompt, userContent);
-        var files = ParseFiles(rawResponse);
+        var files = HtmlGeneratorHelper.ParseFiles(rawResponse);
 
         var expectedPageCount = request.SiteSpec.Pages.Count;
         var actualHtmlCount = files.Count(f => f.FileName.EndsWith(".html"));
@@ -47,16 +46,5 @@ public class HtmlGeneratorService
             RawResponse = rawResponse,
             Files = files
         });
-    }
-
-    private static List<SiteFile> ParseFiles(string response)
-    {
-        var files = new List<SiteFile>();
-        var matches = Regex.Matches(response, @"```(\w+):(\S+)\r?\n(.*?)```", RegexOptions.Singleline);
-
-        foreach (Match match in matches)
-            files.Add(new SiteFile { FileName = match.Groups[2].Value, Content = match.Groups[3].Value });
-
-        return files;
     }
 }

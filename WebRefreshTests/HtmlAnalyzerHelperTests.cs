@@ -1,11 +1,21 @@
-﻿using Shouldly;
+﻿using Newtonsoft.Json;
+using Shouldly;
 using SiteBuilderContracts.Generation;
 using WebRefreshSiteBuilderAPI.Helpers;
+using Xunit.Abstractions;
 
 namespace WebRefreshTests;
 
 public class HtmlAnalyzerHelperTests
 {
+    private readonly ITestOutputHelper output;
+    
+    public HtmlAnalyzerHelperTests(ITestOutputHelper output)
+    {
+        this.output = output;
+    }
+
+    
     [Fact]
     public void TryParsePageSpec_ValidJson_ReturnsPageSpec()
     {
@@ -13,6 +23,13 @@ public class HtmlAnalyzerHelperTests
 
         var result = HtmlAnalyzerHelper.TryParsePageSpec(json);
 
+        result.Url = "https://www.baumkirchners.de/index.html";
+        result.SuggestedFileName = HtmlAnalyzerHelper.DeriveFileName("https://www.baumkirchners.de/index.html", 5);
+
+        var resultJson = JsonConvert.SerializeObject(result);
+        
+        output.WriteLine(resultJson);
+        
         result.ShouldNotBeNull();
         //result.PageTitle.ShouldBe("Home");
         //result.Nav.Count.ShouldBe(1);

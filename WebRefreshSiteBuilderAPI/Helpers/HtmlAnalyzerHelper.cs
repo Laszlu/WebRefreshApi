@@ -40,7 +40,11 @@ public class HtmlAnalyzerHelper
             return "index.html";
 
         var path = uri.AbsolutePath.Trim('/');
-        return string.IsNullOrEmpty(path) ? "index.html" : $"{path.Replace('/', '-').ToLowerInvariant()}.html";
+        if (string.IsNullOrEmpty(path))
+            return "index.html";
+
+        var slug = path.Replace('/', '-').ToLowerInvariant();
+        return slug.EndsWith(".html", StringComparison.OrdinalIgnoreCase) ? slug : $"{slug}.html";
     }
     
     // Keeps only nav links that point to pages actually included in this
