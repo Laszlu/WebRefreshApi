@@ -24,4 +24,15 @@ Rules:
 - For "href" values, extract exactly as they appear in the source HTML (relative or absolute). Do not resolve, rewrite, or normalize them.
 - Do not include a "url" field — it is added separately after extraction.
 
+Additionally extract brand signals under a "brand" key, but only as a fallback — most color information will already be captured separately from linked stylesheets. Only report colors you can see directly in inline style attributes or <style> blocks within this HTML:
+
+"brand": {
+"primaryColor": string | null,
+"accentColor": string | null,
+"backgroundColor": string | null,
+"rawColorHints": [string]
+}
+
+If you see no inline color information, return all fields null and an empty array — do not guess.
+
 The following is the HTML to extract from:

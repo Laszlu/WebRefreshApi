@@ -18,11 +18,14 @@ public class WebCrawlerServiceTests
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
         {
             var url = request.RequestUri!.ToString();
-            var html = _responses.GetValueOrDefault(url, "<html></html>");
+
+            if (!_responses.ContainsKey(url))
+                throw new InvalidOperationException($"FakeHttpMessageHandler received unmapped URL: {url}");
+
             return Task.FromResult(new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.OK,
-                Content = new StringContent(html)
+                Content = new StringContent(_responses[url])
             });
         }
     }
@@ -45,5 +48,26 @@ public class WebCrawlerServiceTests
         var result = await sut.CrawlAsync("https://site.com/");
 
         result.Pages.Count.ShouldBe(2);
+    }
+    
+    [Fact]
+    public async Task CrawlAsync_FetchesLinkedStylesheets()
+    {
+        var responses = new Dictionary<string, string>
+        {
+            ["https://site.com/"] = "<link rel='stylesheet' href='/style.css'><a href='/page2'>2</a>",
+            ["https://site.com/style.css"] = ":root { --brand: #ff0000; }",
+            ["https://site.com/page2"] = "<html></html>"
+        };
+
+        var httpClient = new HttpClient(new FakeHttpMessageHandler(responses));
+        var options = Options.Create(new CrawlOptions { MaxPages = 2, MaxDepth = 1, TimeoutSeconds = 5 });
+        var logger = Substitute.For<ILogger<WebCrawlerService>>();
+
+        var sut = new WebCrawlerService(httpClient, options, logger);
+        var result = await sut.CrawlAsync("https://site.com/");
+
+        var home = result.Pages.First(p => p.Url == "https://site.com/");
+        home.StylesheetContents.ShouldContain(css => css.Contains("#ff0000"));
     }
 }

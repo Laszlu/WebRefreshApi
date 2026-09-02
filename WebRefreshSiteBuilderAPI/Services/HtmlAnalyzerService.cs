@@ -20,41 +20,63 @@ public class HtmlAnalyzerService
     }
 
     public async Task<SiteBuilderApiResultWithPayload<HtmlAnalysisResponse>> AnalyzeHtmlAsync(HtmlAnalysisRequest request)
+{
+    if (request.Pages.Count == 0)
+        return SiteBuilderApiResultWithPayload<HtmlAnalysisResponse>.Fail(SiteBuilderActionResult.RequestContentMissing, null, "At least one page is required.");
+
+    var prompt = await File.ReadAllTextAsync("Prompts/HtmlExtract.md");
+    var rawPages = new List<PageAnalysis>();
+    var pageSpecs = new List<PageSpec>();
+
+    foreach (var page in request.Pages)
     {
-        if (request.Pages.Count == 0)
-            return SiteBuilderApiResultWithPayload<HtmlAnalysisResponse>.Fail(SiteBuilderActionResult.RequestContentMissing, null, "At least one page is required.");
+        // Deterministic pass first — no API call, no cost, no hallucination risk.
+        var cssColors = page.StylesheetContents
+            .SelectMany(CssColorExtractionHelper.ExtractDeclaredColors)
+            .Distinct()
+            .ToList();
 
-        var prompt = await File.ReadAllTextAsync("Prompts/HtmlExtract.md");
-        var rawPages = new List<PageAnalysis>();
-        var pageSpecs = new List<PageSpec>();
+        var raw = await _agentService.SendHtmlExtractMessage(prompt, page.Html);
+        rawPages.Add(new PageAnalysis { Url = page.Url, Response = raw });
 
-        foreach (var page in request.Pages)
+        var parsed = HtmlAnalyzerHelper.TryParsePageSpec(raw);
+        if (parsed == null)
         {
-            var raw = await _agentService.SendHtmlExtractMessage(prompt, page.Html);
-            rawPages.Add(new PageAnalysis { Url = page.Url, Response = raw });
-
-            var parsed = HtmlAnalyzerHelper.TryParsePageSpec(raw);
-            if (parsed == null)
-            {
-                _logger.LogWarning("Failed to parse stage 1 JSON for {Url}", page.Url);
-                continue;
-            }
-
-            parsed.Url = page.Url;
-            parsed.SuggestedFileName = HtmlAnalyzerHelper.DeriveFileName(page.Url, request.Pages.Count);
-            pageSpecs.Add(parsed);
+            _logger.LogWarning("Failed to parse stage 1 JSON for {Url}", page.Url);
+            continue;
         }
 
-        var siteSpec = new SiteSpec
-        {
-            Pages = pageSpecs,
-            Nav = HtmlAnalyzerHelper.BuildInternalNav(pageSpecs)
-        };
+        parsed.Url = page.Url;
+        parsed.SuggestedFileName = HtmlAnalyzerHelper.DeriveFileName(page.Url, request.Pages.Count);
 
-        return SiteBuilderApiResultWithPayload<HtmlAnalysisResponse>.Success(new HtmlAnalysisResponse
+        // CSS-derived colors take priority over whatever the LLM inferred from
+        // inline styles — deterministic and exact beats inferred and approximate.
+        if (cssColors.Count > 0)
         {
-            SiteSpec = siteSpec,
-            RawPages = rawPages
-        });
+            parsed.Brand.PrimaryColor ??= cssColors.ElementAtOrDefault(0);
+            parsed.Brand.AccentColor ??= cssColors.ElementAtOrDefault(1);
+            parsed.Brand.RawColorHints = cssColors;
+            parsed.Brand.Source = "css";
+        }
+        else if (parsed.Brand.PrimaryColor != null || parsed.Brand.RawColorHints.Count > 0)
+        {
+            parsed.Brand.Source = "llm";
+        }
+
+        pageSpecs.Add(parsed);
     }
+
+    var siteSpec = new SiteSpec
+    {
+        Pages = pageSpecs,
+        Nav = HtmlAnalyzerHelper.BuildInternalNav(pageSpecs),
+        Brand = CssColorExtractionHelper.ResolveBrandColors(pageSpecs)
+    };
+
+    return SiteBuilderApiResultWithPayload<HtmlAnalysisResponse>.Success(new HtmlAnalysisResponse
+    {
+        SiteSpec = siteSpec,
+        RawPages = rawPages
+    });
+}
 }

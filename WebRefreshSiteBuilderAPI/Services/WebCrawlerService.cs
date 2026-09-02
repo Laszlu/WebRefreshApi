@@ -48,7 +48,10 @@ public class WebCrawlerService
                 continue;
             }
 
-            pages.Add(new PageInput { Url = url, Html = html });
+            // new — fetch linked stylesheets for this page before constructing PageInput
+            var stylesheets = await FetchLinkedStylesheetsAsync(html, new Uri(url), ct);
+
+            pages.Add(new PageInput { Url = url, Html = html, StylesheetContents = stylesheets });
 
             if (depth >= _options.MaxDepth)
                 continue;
@@ -63,8 +66,39 @@ public class WebCrawlerService
         return new HtmlAnalysisRequest { Pages = pages };
     }
 
+    // new
+    private async Task<List<string>> FetchLinkedStylesheetsAsync(string html, Uri pageUri, CancellationToken ct)
+    {
+        var doc = new HtmlDocument();
+        doc.LoadHtml(html);
+
+        var hrefs = doc.DocumentNode
+            .SelectNodes("//link[@rel='stylesheet'][@href]")
+            ?.Select(n => n.GetAttributeValue("href", ""))
+            ?? Enumerable.Empty<string>();
+
+        var results = new List<string>();
+        foreach (var href in hrefs)
+        {
+            if (!Uri.TryCreate(pageUri, href, out var absoluteUri))
+                continue;
+
+            try
+            {
+                results.Add(await _httpClient.GetStringAsync(absoluteUri, ct));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to fetch stylesheet {Url}, skipping", absoluteUri);
+            }
+        }
+
+        return results;
+    }
+
     private static IEnumerable<string> ExtractSameDomainLinks(string html, Uri rootUri)
     {
+        // unchanged
         var doc = new HtmlDocument();
         doc.LoadHtml(html);
 
