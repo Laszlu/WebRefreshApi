@@ -6,7 +6,7 @@ using SiteBuilderContracts.Config;
 
 namespace WebRefreshSiteBuilderAPI.Services;
 
-public class AgentService
+public class AgentService : IAgentService
 {
     private readonly IAgentClient _agentClient;
     private readonly IAgentModelResolver _modelResolver;

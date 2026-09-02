@@ -1,0 +1,98 @@
+{
+  "pageTitle": "Willkommen auf unserer Hompage - Baumkirchner",
+  "nav": [
+    {
+      "label": "Home",
+      "href": ""
+    },
+    {
+      "label": "Wochenkarte",
+      "href": "wochenkarte.html?Wochenkarte"
+    },
+    {
+      "label": "Speisekarte",
+      "href": "speisekarte.html?Speisekarte"
+    },
+    {
+      "label": "Cocktailkarte",
+      "href": "cocktailkarte.html?Cocktailkarte"
+    },
+    {
+      "label": "Anfahrt",
+      "href": "anfahrt.html?Anfahrt"
+    },
+    {
+      "label": "Impressum",
+      "href": "impressum.html?Impressum"
+    }
+  ],
+  "sections": [
+    {
+      "type": "content",
+      "heading": "Zum Abholen",
+      "bodyText": "Oben in der Leiste auf Speisekarte oder Wochenkarte klicken und auswählen!\n\nEinfach   089 45 666 939   anrufen, bestellen und abholen\n\nGeöffnet ab 17 Uhr\n\nKüche von 17:00 bis 22:30\n\nSeit 2003 in München, Berg am Laim",
+      "images": [
+        {
+          "src": "images/Hintergrund.png",
+          "alt": ""
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "heading": null,
+      "bodyText": "Dieses Objekt wird videoüberwacht!\n\nWir akzeptieren EC-Kartenzahlung und Kreditkarten:\n\nReservierungen bzw. die Einnahme eines Platzes beinhaltet eine Bestellung von Speisen und Getränken!",
+      "images": [
+        {
+          "src": "userfiles/images/Pay/AmericanExpress.gif",
+          "alt": "AmericanExpress"
+        },
+        {
+          "src": "userfiles/images/Pay/Mastercard.gif",
+          "alt": "Mastercard"
+        },
+        {
+          "src": "userfiles/images/Pay/Visa.gif",
+          "alt": "Visa"
+        },
+        {
+          "src": "userfiles/images/Pay/VPay.gif",
+          "alt": "VPay"
+        },
+        {
+          "src": "userfiles/images/Pay/DinersClubInternational.gif",
+          "alt": "DinersClubInternational"
+        },
+        {
+          "src": "userfiles/images/Pay/JCB.gif",
+          "alt": "JCB"
+        },
+        {
+          "src": "userfiles/images/Pay/Maestro.gif",
+          "alt": "Maestro"
+        },
+        {
+          "src": "userfiles/images/Pay/UnionPay.gif",
+          "alt": "UnionPay"
+        }
+      ]
+    },
+    {
+      "type": "footer",
+      "heading": null,
+      "bodyText": "Datenschutzerklärung",
+      "images": [
+        {
+          "src": "templates/bumineu/images/cms.gif",
+          "alt": "cmsimple"
+        }
+      ]
+    }
+  ],
+  "existingComponents": [
+    "navigation-menu",
+    "image-display",
+    "payment-method-icons",
+    "footer-links"
+  ]
+}

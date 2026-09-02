@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
+using SiteBuilderContracts.Agents;
 using SiteBuilderContracts.Generation;
 using SiteBuilderContracts.Requests;
 using SiteBuilderContracts.Responses;
@@ -10,12 +11,12 @@ namespace WebRefreshSiteBuilderAPI.Services;
 public class HtmlGeneratorService
 {
     private readonly ILogger<HtmlGeneratorService> _logger;
-    private readonly AgentService _agentService;
+    private readonly IAgentService _agentService;
 
     private const string DefaultDesignSpecPath = "DesignSpec/style-guide.md";
     private const string PromptPath = "Prompts/HtmlGenerate.md";
 
-    public HtmlGeneratorService(AgentService agentService, ILogger<HtmlGeneratorService> logger)
+    public HtmlGeneratorService(IAgentService agentService, ILogger<HtmlGeneratorService> logger)
     {
         _agentService = agentService;
         _logger = logger;

@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebRefreshSiteBuilderAPI", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SiteBuilderContracts", "SiteBuilderContracts\SiteBuilderContracts.csproj", "{383A5B16-671F-4FD2-93F7-99677ECDCEFC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebRefreshTests", "WebRefreshTests\WebRefreshTests.csproj", "{E6EBF864-666C-4F22-BD9C-459AF16640CF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{383A5B16-671F-4FD2-93F7-99677ECDCEFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{383A5B16-671F-4FD2-93F7-99677ECDCEFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{383A5B16-671F-4FD2-93F7-99677ECDCEFC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6EBF864-666C-4F22-BD9C-459AF16640CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6EBF864-666C-4F22-BD9C-459AF16640CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6EBF864-666C-4F22-BD9C-459AF16640CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6EBF864-666C-4F22-BD9C-459AF16640CF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using OpenAI;
 using SiteBuilderContracts.Agents;
 using SiteBuilderContracts.Config;
+using SiteBuilderContracts.Crawling;
 using WebRefreshSiteBuilderAPI.Agents;
 using WebRefreshSiteBuilderAPI.Services;
 
@@ -102,8 +103,14 @@ public class Program
             default:
                 throw new InvalidOperationException($"Unknown AgentProvider: {provider}");
         }
+        
+        builder.Services.AddOptions<CrawlOptions>()
+            .Bind(builder.Configuration.GetSection(CrawlOptions.SectionName))
+            .ValidateOnStart();
 
-        builder.Services.AddScoped<AgentService>();
+        builder.Services.AddHttpClient<WebCrawlerService>();
+
+        builder.Services.AddScoped<IAgentService, AgentService>();
         builder.Services.AddScoped<HtmlAnalyzerService>();
         builder.Services.AddScoped<HtmlGeneratorService>();
         builder.Services.AddScoped<QaCheckService>();
