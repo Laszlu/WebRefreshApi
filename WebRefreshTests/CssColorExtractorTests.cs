@@ -1,5 +1,6 @@
 using Shouldly;
 using SiteBuilderContracts.Generation;
+using SiteBuilderContracts.Requests;
 using WebRefreshSiteBuilderAPI.Helpers;
 
 namespace WebRefreshTests;
@@ -57,41 +58,30 @@ public class CssColorExtractionHelperTests
     }
     
     [Fact]
-    public void ResolveBrandColors_CssSourcedPage_PreferredOverLlmSourced()
+    public void ResolveBrandColors_SiteWideCssPresent_AppliesUniformly()
     {
-        var pages = new List<PageSpec>
-        {
-            new() { Brand = new BrandSignals { PrimaryColor = "#llmguess", Source = "llm" } },
-            new() { Brand = new BrandSignals { PrimaryColor = "#realcolor", Source = "css" } }
-        };
+        var pages = new List<PageSpec> { new(), new() };
+        var siteWideColors = new List<string> { "#FF7D00", "#000000" };
 
-        var result = CssColorExtractionHelper.ResolveBrandColors(pages);
+        var result = CssColorExtractionHelper.ResolveBrandColors(pages, siteWideColors);
 
-        result.PrimaryColor.ShouldBe("#realcolor");
+        result.PrimaryColor.ShouldBe("#FF7D00");
         result.Source.ShouldBe("css");
     }
-
+    
     [Fact]
-    public void ResolveBrandColors_NoCssAnywhere_FallsBackToLlm()
+    public void ExtractSiteWideCssColors_DuplicateStylesheetAcrossPages_ParsedOnce()
     {
-        var pages = new List<PageSpec>
+        var sharedCss = ":root { --primary: #FF7D00; --accent: #000000; }";
+        var pages = new List<PageInput>
         {
-            new() { Brand = new BrandSignals { PrimaryColor = "#llmguess", Source = "llm" } }
+            new() { Url = "https://site.com/a", StylesheetContents = [sharedCss] },
+            new() { Url = "https://site.com/b", StylesheetContents = [sharedCss] }
         };
 
-        var result = CssColorExtractionHelper.ResolveBrandColors(pages);
+        var colors = CssColorExtractionHelper.ExtractSiteWideCssColors(pages);
 
-        result.Source.ShouldBe("llm");
-    }
-
-    [Fact]
-    public void ResolveBrandColors_NoSignalsAtAll_ReturnsNoneSource()
-    {
-        var pages = new List<PageSpec> { new() { Brand = new BrandSignals() } };
-
-        var result = CssColorExtractionHelper.ResolveBrandColors(pages);
-
-        result.Source.ShouldBe("none");
-        result.PrimaryColor.ShouldBeNull();
+        colors.ShouldContain("#FF7D00");
+        colors.ShouldContain("#000000");
     }
 }

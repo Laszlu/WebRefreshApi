@@ -26,7 +26,7 @@ public class HtmlGeneratorService
         var prompt = await File.ReadAllTextAsync(PromptPath);
         var designSpec = request.DesignSpecOverride ?? await File.ReadAllTextAsync(DefaultDesignSpecPath);
 
-        var siteSpecJson = JsonConvert.SerializeObject(request.SiteSpec);
+        var siteSpecJson = JsonConvert.SerializeObject(request.SiteSpec, JsonSerializerHelper.CamelCaseSettings);
         var userContent = siteSpecJson + "\n\n---DESIGN SPEC---\n" + designSpec;
 
         var rawResponse = await _agentService.SendHtmlGenerateMessage(prompt, userContent);

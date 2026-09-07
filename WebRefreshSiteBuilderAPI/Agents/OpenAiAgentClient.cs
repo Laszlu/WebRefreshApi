@@ -17,7 +17,7 @@ public class OpenAiAgentClient : IAgentClient
         _options = options.Value;
     }
 
-    public async Task<string> SendAsync(string model, string systemPrompt, string userContent, CancellationToken ct = default)
+    public async Task<string> SendAsync(string model, int maxTokens, string systemPrompt, string userContent, CancellationToken ct = default)
     {
         var chatClient = _client.GetChatClient(ParseModel(model));
 
@@ -29,7 +29,7 @@ public class OpenAiAgentClient : IAgentClient
 
         var completionOptions = new ChatCompletionOptions
         {
-            MaxOutputTokenCount = _options.MaxTokens
+            MaxOutputTokenCount = maxTokens
         };
 
         var response = await chatClient.CompleteChatAsync(messages, completionOptions, ct);

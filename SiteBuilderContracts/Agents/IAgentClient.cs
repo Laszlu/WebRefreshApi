@@ -2,5 +2,5 @@ namespace SiteBuilderContracts.Agents;
 
 public interface IAgentClient
 {
-    Task<string> SendAsync(string model, string systemPrompt, string userContent, CancellationToken ct = default);
+    Task<string> SendAsync(string model, int maxTokens, string systemPrompt, string userContent, CancellationToken ct = default);
 }

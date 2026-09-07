@@ -1,5 +1,7 @@
-using System.Text.Json;
+using Newtonsoft.Json;
 using SiteBuilderContracts.Generation;
+using WebRefreshSiteBuilderAPI.Data;
+using JsonException = System.Text.Json.JsonException;
 
 namespace WebRefreshSiteBuilderAPI.Helpers;
 
@@ -10,7 +12,7 @@ public class HtmlAnalyzerHelper
         try
         {
             var json = StripCodeFence(raw);
-            return JsonSerializer.Deserialize<PageSpec>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            return JsonConvert.DeserializeObject<PageSpec>(json, JsonSerializerHelper.CamelCaseSettings);
         }
         catch (JsonException)
         {

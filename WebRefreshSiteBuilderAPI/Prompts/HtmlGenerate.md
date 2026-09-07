@@ -4,10 +4,19 @@ Your job is to generate a complete, modern, responsive static website from these
 
 ## Input format
 
+## Input format
+
 The SiteSpec JSON has this shape:
 
 {
 "nav": [{"label": string, "href": string}],
+"brand": {
+"primaryColor": string | null,
+"accentColor": string | null,
+"backgroundColor": string | null,
+"rawColorHints": [string],
+"source": "css" | "llm" | "none"
+},
 "pages": [
 {
 "url": string,
@@ -19,7 +28,7 @@ The SiteSpec JSON has this shape:
 "type": "hero" | "content" | "features" | "footer" | "other",
 "heading": string | null,
 "bodyText": string,
-"images": [{"src": string, "alt": string}]
+"images": [{"src": string, "alt": string, "role": "logo" | "content" | "decorative" | "icon" | "unknown"}]
 }
 ],
 "existingComponents": [string]
@@ -39,9 +48,27 @@ The design spec that follows this prompt defines colors, type scale, spacing, an
 ## Content rules
 
 - Use only the content provided in `sections`. Do not add sections, headings, or body text that aren't in the input.
-- Do not fabricate images. Use the exact `src` and `alt` values given. If a section has no images, don't add any.
 - If `existingComponents` lists a pattern (e.g. "card-grid"), use the matching component convention from the design spec for that content, don't invent a new pattern for it.
 - Preserve the meaning and completeness of `bodyText`. You may adjust markup structure (e.g. splitting into paragraphs) but do not shorten, summarize, or omit content.
+
+## Brand colors
+
+The SiteSpec's top-level "brand" object contains colors extracted from the source site. You MUST use them to override the design spec's default color tokens:
+
+- If brand.primaryColor is not null, use it as --color-primary (replacing the design spec's default).
+- If brand.accentColor is not null, use it as --color-accent (replacing the design spec's default).
+- If brand.backgroundColor is not null, use it as --color-bg (replacing the design spec's default).
+- If a brand color is null, keep the design spec's default for that specific token only.
+- Keep every other design spec rule unchanged (spacing, typography, layout, component structure) — only the color values themselves are overridden.
+- Do this even if the brand colors look unusual or clash with your own aesthetic judgment. The client's actual brand identity takes priority over the design spec's placeholder palette.
+
+## Image rules
+
+- Do not fabricate images. Use the exact "src" and "alt" values given. If a section has no images, don't add any.
+- Only include images where "role" is "logo" or "content".
+- NEVER include an image where "role" is "decorative" or "icon" — omit these entirely from the output, do not render them anywhere on the page.
+- If "role" is "unknown", use your judgment based on the surrounding section context, but default to omitting it if uncertain.
+- If an image's "alt" value is an empty string but "role" is "logo", you may write a minimal, factual alt value (e.g. "{pageTitle} logo") since this is accessibility metadata, not visible content — this is the one case where generating text not present in the input is permitted.
 
 ## Technical rules
 

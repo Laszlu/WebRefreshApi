@@ -20,12 +20,14 @@ public class AgentService : IAgentService
     public Task<string> SendHtmlExtractMessage(string prompt, string sourceHtml, CancellationToken ct = default)
     {
         var model = _modelResolver.GetModel(AgentStage.Extract);
-        return _agentClient.SendAsync(model, prompt, sourceHtml, ct);
+        var maxTokens = _modelResolver.GetMaxTokens(AgentStage.Extract);
+        return _agentClient.SendAsync(model, maxTokens, prompt, sourceHtml, ct);
     }
 
     public Task<string> SendHtmlGenerateMessage(string prompt, string siteSpecJson, CancellationToken ct = default)
     {
         var model = _modelResolver.GetModel(AgentStage.Generate);
-        return _agentClient.SendAsync(model, prompt, siteSpecJson, ct);
+        var maxTokens = _modelResolver.GetMaxTokens(AgentStage.Generate);
+        return _agentClient.SendAsync(model, maxTokens, prompt, siteSpecJson, ct);
     }
 }

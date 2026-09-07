@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace WebRefreshSiteBuilderAPI.Data;
 
@@ -16,6 +18,14 @@ public enum SiteBuilderActionResult
     AgentError = 2,
     HtmlParseError = 3,
     RequestContentMissing = 4
+}
+
+public class JsonSerializerHelper
+{
+    public static readonly JsonSerializerSettings CamelCaseSettings = new()
+    {
+        ContractResolver = new CamelCasePropertyNamesContractResolver()
+    };
 }
 
 public sealed record SiteBuilderApiResult(SiteBuilderActionResult ActionResult, string? ErrorMessage = null)

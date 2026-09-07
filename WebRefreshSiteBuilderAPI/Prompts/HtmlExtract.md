@@ -10,7 +10,7 @@ Output ONLY valid JSON, no markdown fences, no commentary. Schema:
 "type": "hero" | "content" | "features" | "footer" | "other",
 "heading": string | null,
 "bodyText": string,
-"images": [{"src": string, "alt": string}]
+"images": [{"src": string, "alt": string, "role": "logo" | "content" | "decorative" | "icon" | "unknown"}]
 }
 ],
 "existingComponents": [string]  // e.g. "card-grid", "cta-button"
@@ -23,6 +23,12 @@ Rules:
 - This page may be one of several pages from the same site. Extract only the navigation links present in THIS page's HTML. Do not add, guess, or complete links to other pages you have not seen.
 - For "href" values, extract exactly as they appear in the source HTML (relative or absolute). Do not resolve, rewrite, or normalize them.
 - Do not include a "url" field — it is added separately after extraction.
+- For each image, set "role" using these signals:
+    - "logo": appears in a header/nav element, or filename/alt text contains "logo"
+    - "icon": small images used for UI (arrows, social icons), typically inside nav or footer
+    - "content": images inside body sections illustrating actual content (products, team, photos)
+    - "decorative": background or filler images with no informational alt text
+    - "unknown": use only if none of the above can be determined with reasonable confidence
 
 Additionally extract brand signals under a "brand" key, but only as a fallback — most color information will already be captured separately from linked stylesheets. Only report colors you can see directly in inline style attributes or <style> blocks within this HTML:
 

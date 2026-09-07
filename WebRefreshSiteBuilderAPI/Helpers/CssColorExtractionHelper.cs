@@ -1,5 +1,6 @@
 using ExCSS;
 using SiteBuilderContracts.Generation;
+using SiteBuilderContracts.Requests;
 
 namespace WebRefreshSiteBuilderAPI.Helpers;
 
@@ -32,22 +33,45 @@ public class CssColorExtractionHelper
 
         return colors.Distinct().Take(10).ToList();
     }
+    
+    public static List<string> ExtractSiteWideCssColors(List<PageInput> pages)
+    {
+        var uniqueStylesheets = pages
+            .SelectMany(p => p.StylesheetContents)
+            .Distinct()
+            .ToList();
+
+        return uniqueStylesheets
+            .SelectMany(ExtractDeclaredColors)
+            .Distinct()
+            .ToList();
+    }
 
     private static bool LooksLikeColor(string value)
         => value.StartsWith('#') || value.StartsWith("rgb") || value.StartsWith("hsl");
     
-    public static BrandSignals ResolveBrandColors(List<PageSpec> pages)
+    public static BrandSignals ResolveBrandColors(List<PageSpec> pages, List<string> siteWideCssColors)
     {
-        var cssPages = pages.Where(p => p.Brand.Source == "css").ToList();
-        var relevant = cssPages.Count > 0 ? cssPages : pages;
+        if (siteWideCssColors.Count > 0)
+        {
+            return new BrandSignals
+            {
+                PrimaryColor = siteWideCssColors.ElementAtOrDefault(0),
+                AccentColor = siteWideCssColors.ElementAtOrDefault(1),
+                BackgroundColor = siteWideCssColors.ElementAtOrDefault(2),
+                RawColorHints = siteWideCssColors,
+                Source = "css"
+            };
+        }
 
+        var llmPages = pages.Where(p => p.Brand.Source == "llm").ToList();
         return new BrandSignals
         {
-            PrimaryColor = relevant.Select(p => p.Brand.PrimaryColor).FirstOrDefault(c => c != null),
-            AccentColor = relevant.Select(p => p.Brand.AccentColor).FirstOrDefault(c => c != null),
-            BackgroundColor = relevant.Select(p => p.Brand.BackgroundColor).FirstOrDefault(c => c != null),
-            RawColorHints = relevant.SelectMany(p => p.Brand.RawColorHints).Distinct().ToList(),
-            Source = cssPages.Count > 0 ? "css" : (pages.Any(p => p.Brand.Source == "llm") ? "llm" : "none")
+            PrimaryColor = llmPages.Select(p => p.Brand.PrimaryColor).FirstOrDefault(c => c != null),
+            AccentColor = llmPages.Select(p => p.Brand.AccentColor).FirstOrDefault(c => c != null),
+            BackgroundColor = llmPages.Select(p => p.Brand.BackgroundColor).FirstOrDefault(c => c != null),
+            RawColorHints = llmPages.SelectMany(p => p.Brand.RawColorHints).Distinct().ToList(),
+            Source = llmPages.Count > 0 ? "llm" : "none"
         };
     }
 }
