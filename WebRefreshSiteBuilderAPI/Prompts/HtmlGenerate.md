@@ -50,6 +50,7 @@ The design spec that follows this prompt defines colors, type scale, spacing, an
 - Use only the content provided in `sections`. Do not add sections, headings, or body text that aren't in the input.
 - If `existingComponents` lists a pattern (e.g. "card-grid"), use the matching component convention from the design spec for that content, don't invent a new pattern for it.
 - Preserve the meaning and completeness of `bodyText`. You may adjust markup structure (e.g. splitting into paragraphs) but do not shorten, summarize, or omit content.
+- If a section's "links" array is non-empty, render those as an actual list of hyperlinks (<ul><li><a>) within that section, using the same href-resolution logic as the main nav. Do not omit them or convert them to plain text.
 
 ## Brand colors
 

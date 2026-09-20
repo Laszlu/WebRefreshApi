@@ -12,15 +12,15 @@ public class OpenAiModelResolver: IAgentModelResolver
 
     public string GetModel(AgentStage stage) => stage switch
     {
-        AgentStage.Extract => _options.ExtractModel,
-        AgentStage.Generate => _options.GenerateModel,
+        AgentStage.Extract or AgentStage.Content or AgentStage.Structure or AgentStage.Visual or AgentStage.Navigation => _options.ExtractModel,
+        AgentStage.Plan or AgentStage.Generate => _options.GenerateModel,
         _ => throw new ArgumentOutOfRangeException(nameof(stage))
     };
     
     public int GetMaxTokens(AgentStage stage) => stage switch
     {
-        AgentStage.Extract => _options.ExtractMaxTokens,
-        AgentStage.Generate => _options.GenerateMaxTokens,
+        AgentStage.Extract or AgentStage.Content or AgentStage.Structure or AgentStage.Visual or AgentStage.Navigation => _options.ExtractMaxTokens,
+        AgentStage.Plan or AgentStage.Generate => _options.GenerateMaxTokens,
         _ => throw new ArgumentOutOfRangeException(nameof(stage))
     };
 }

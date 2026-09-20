@@ -10,7 +10,8 @@ Output ONLY valid JSON, no markdown fences, no commentary. Schema:
 "type": "hero" | "content" | "features" | "footer" | "other",
 "heading": string | null,
 "bodyText": string,
-"images": [{"src": string, "alt": string, "role": "logo" | "content" | "decorative" | "icon" | "unknown"}]
+"images": [{"src": string, "alt": string, "role": "logo" | "content" | "decorative" | "icon" | "unknown"}],
+"links":[{"label": string, "href": string}]
 }
 ],
 "existingComponents": [string]  // e.g. "card-grid", "cta-button"
@@ -22,6 +23,8 @@ Rules:
 - Do not add sections that don't exist in the source.
 - This page may be one of several pages from the same site. Extract only the navigation links present in THIS page's HTML. Do not add, guess, or complete links to other pages you have not seen.
 - For "href" values, extract exactly as they appear in the source HTML (relative or absolute). Do not resolve, rewrite, or normalize them.
+- Extract nav "label" values character-for-character as they appear in the source (including exact capitalization and company names). Do not normalize, translate, or replace a link's visible text with a generic label like "Home" even if that's clearly its function.
+- If a section contains a list or table of links (not part of the main navigation), extract each as {"label": string, "href": string} under a "links" array on that section. Do not flatten them into bodyText as plain text — preserve them as structured links so they can be rendered as actual links in the output.
 - Do not include a "url" field — it is added separately after extraction.
 - For each image, set "role" using these signals:
     - "logo": appears in a header/nav element, or filename/alt text contains "logo"

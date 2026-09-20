@@ -28,6 +28,8 @@ public class HtmlGeneratorService
 
         var siteSpecJson = JsonConvert.SerializeObject(request.SiteSpec, JsonSerializerHelper.CamelCaseSettings);
         var userContent = siteSpecJson + "\n\n---DESIGN SPEC---\n" + designSpec;
+        if (!string.IsNullOrWhiteSpace(request.RepairInstructions))
+            userContent += "\n\n---REPAIR REQUIREMENTS---\n" + request.RepairInstructions;
 
         var rawResponse = await _agentService.SendHtmlGenerateMessage(prompt, userContent);
         var files = HtmlGeneratorHelper.ParseFiles(rawResponse);

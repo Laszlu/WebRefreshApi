@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SiteBuilderContracts.Requests;
+using SiteBuilderContracts.Pipeline;
 using WebRefreshSiteBuilderAPI.Data;
 using WebRefreshSiteBuilderAPI.Services;
 
@@ -23,4 +24,13 @@ public class HtmlGeneratorController : ControllerBase
     {
         return (await _htmlGeneratorService.GenerateHtmlAsync(request)).ToActionResult();
     }
+
+    [HttpPost("GenerateFromPlan")]
+    public async Task<IActionResult> GenerateFromPlanAsync([FromBody] PlanGenerationRequest request)
+        => (await _htmlGeneratorService.GenerateHtmlAsync(new HtmlGenerationRequest
+        {
+            SiteSpec = request.Plan.SiteSpec,
+            DesignSpecOverride = request.DesignSpecOverride,
+            RepairInstructions = request.RepairInstructions
+        })).ToActionResult();
 }

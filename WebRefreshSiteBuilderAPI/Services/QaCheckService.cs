@@ -2,6 +2,7 @@ using System.Diagnostics;
 using SiteBuilderContracts.Requests;
 using SiteBuilderContracts.Responses;
 using WebRefreshSiteBuilderAPI.Data;
+using HtmlAgilityPack;
 
 namespace WebRefreshSiteBuilderAPI.Services;
 
@@ -25,7 +26,13 @@ public class QaCheckService
         try
         {
             foreach (var file in request.Files)
-                await File.WriteAllTextAsync(Path.Combine(tempDir, file.FileName), file.Content);
+            {
+                var path = Path.GetFullPath(Path.Combine(tempDir, file.FileName));
+                if (!path.StartsWith(tempDir + Path.DirectorySeparatorChar, StringComparison.Ordinal))
+                    return SiteBuilderApiResultWithPayload<QaResponse>.Fail(SiteBuilderActionResult.RequestContentMissing, null, "Generated filename escapes the QA directory.");
+                Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+                await File.WriteAllTextAsync(path, file.Content);
+            }
 
             var issues = new List<string>();
 
@@ -45,6 +52,9 @@ public class QaCheckService
             {
                 issues.AddRange(CheckJsScope(jsFile.Content));
             }
+            issues.AddRange(CheckHtmlReferences(request.Files));
+            if (request.ExpectedSiteSpec is not null)
+                issues.AddRange(CheckContentPreservation(request.Files, request.ExpectedSiteSpec));
             
             var result = new QaResponse { Passed = issues.Count == 0, Issues = issues };
 
@@ -60,6 +70,36 @@ public class QaCheckService
 
     private List<string> CheckJsScope(string js)
         => ForbiddenJsPatterns.Where(js.Contains).Select(f => $"Forbidden JS pattern used: {f}").ToList();
+
+    private static List<string> CheckHtmlReferences(IEnumerable<SiteBuilderContracts.Generation.SiteFile> files)
+    {
+        var names = files.Select(f => f.FileName).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var issues = new List<string>();
+        foreach (var file in files.Where(f => f.FileName.EndsWith(".html", StringComparison.OrdinalIgnoreCase)))
+        {
+            var doc = new HtmlDocument(); doc.LoadHtml(file.Content);
+            foreach (var node in doc.DocumentNode.SelectNodes("//a[@href]|//img[@src]") ?? Enumerable.Empty<HtmlNode>())
+            {
+                var value = node.GetAttributeValue(node.Name == "a" ? "href" : "src", "");
+                if (string.IsNullOrWhiteSpace(value) || value.StartsWith('#') || Uri.TryCreate(value, UriKind.Absolute, out _)) continue;
+                var local = value.Split('#')[0].Split('?')[0];
+                if (local.EndsWith(".html", StringComparison.OrdinalIgnoreCase) && !names.Contains(local)) issues.Add($"{file.FileName} references missing generated page: {value}");
+                if (node.Name == "img" && string.IsNullOrWhiteSpace(node.GetAttributeValue("alt", ""))) issues.Add($"{file.FileName} has image without alt text: {value}");
+            }
+        }
+        return issues;
+    }
+
+    private static List<string> CheckContentPreservation(IEnumerable<SiteBuilderContracts.Generation.SiteFile> files, SiteBuilderContracts.Generation.SiteSpec spec)
+    {
+        var allHtml = string.Join("\n", files.Where(f => f.FileName.EndsWith(".html", StringComparison.OrdinalIgnoreCase)).Select(f => f.Content));
+        var issues = new List<string>();
+        foreach (var text in spec.Pages.SelectMany(p => p.Sections).Select(s => s.BodyText).Where(t => !string.IsNullOrWhiteSpace(t)))
+            if (!allHtml.Contains(text, StringComparison.Ordinal)) issues.Add("Generated output omitted source body text.");
+        foreach (var image in spec.Pages.SelectMany(p => p.Sections).SelectMany(s => s.Images).Where(i => i.Role is "logo" or "content"))
+            if (!allHtml.Contains(image.Src, StringComparison.Ordinal)) issues.Add($"Generated output omitted source image: {image.Src}");
+        return issues.Distinct().ToList();
+    }
 
     private async Task<List<string>> RunCheckAsync(string cmd, string args)
     {

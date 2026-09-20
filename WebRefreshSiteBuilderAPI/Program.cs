@@ -111,6 +111,12 @@ public class Program
         builder.Services.AddHttpClient<WebCrawlerService>();
 
         builder.Services.AddScoped<IAgentService, AgentService>();
+        builder.Services.AddSingleton<BrowserRenderService>();
+        builder.Services.AddScoped<DeterministicExtractionService>();
+        builder.Services.AddScoped<EvidenceAgentService>();
+        builder.Services.AddScoped<DesignPlannerService>();
+        builder.Services.AddScoped<VisualQaService>();
+        builder.Services.AddScoped<FullPipelineService>();
         builder.Services.AddScoped<HtmlAnalyzerService>();
         builder.Services.AddScoped<HtmlGeneratorService>();
         builder.Services.AddScoped<QaCheckService>();

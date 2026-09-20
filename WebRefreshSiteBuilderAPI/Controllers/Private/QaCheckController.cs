@@ -12,10 +12,12 @@ namespace WebRefreshSiteBuilderAPI.Controllers.Private;
 public class QaCheckController : ControllerBase
 {
     private readonly QaCheckService _qaCheckService;
+    private readonly VisualQaService _visualQaService;
 
-    public QaCheckController(QaCheckService qaCheckService)
+    public QaCheckController(QaCheckService qaCheckService, VisualQaService visualQaService)
     {
         _qaCheckService = qaCheckService;
+        _visualQaService = visualQaService;
     }
 
     [HttpPost("Run")]
@@ -23,4 +25,8 @@ public class QaCheckController : ControllerBase
     {
         return (await _qaCheckService.RunQaAsync(request)).ToActionResult();
     }
+
+    [HttpPost("Visual")]
+    public async Task<IActionResult> RunVisualQaAsync([FromBody] QaRequest request, CancellationToken ct)
+        => Ok(await _visualQaService.RunAsync(request.Files, ct));
 }

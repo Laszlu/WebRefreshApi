@@ -14,7 +14,7 @@ public class HtmlAnalyzerHelper
             var json = StripCodeFence(raw);
             return JsonConvert.DeserializeObject<PageSpec>(json, JsonSerializerHelper.CamelCaseSettings);
         }
-        catch (JsonException)
+        catch (Exception ex) when (ex is JsonException or Newtonsoft.Json.JsonException)
         {
             return null;
         }

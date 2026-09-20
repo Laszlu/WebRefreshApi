@@ -1,10 +1,10 @@
-using SiteBuilderContracts.Generation;
+using SiteBuilderContracts.Pipeline;
 
 namespace SiteBuilderContracts.Requests;
 
-public class HtmlGenerationRequest
+public sealed class PlanGenerationRequest
 {
-    public SiteSpec SiteSpec { get; set; } = new();
+    public DesignPlan Plan { get; set; } = new();
     public string? DesignSpecOverride { get; set; }
     public string? RepairInstructions { get; set; }
 }

@@ -23,6 +23,13 @@ public class Section
     public string? Heading { get; set; }
     public string BodyText { get; set; } = string.Empty;
     public List<ImageRef> Images { get; set; } = new();
+    public List<InlineLink> Links { get; set; } = new(); // new
+}
+
+public class InlineLink
+{
+    public string Label { get; set; } = string.Empty;
+    public string Href { get; set; } = string.Empty;
 }
 
 public class BrandSignals
