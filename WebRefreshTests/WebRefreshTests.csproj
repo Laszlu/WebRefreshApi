@@ -22,7 +22,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\31-07-26\ApiBase\ApiBase.csproj" />
+      <ProjectReference Include="..\ApiBase\ApiBase.csproj" />
       <ProjectReference Include="..\SiteBuilderContracts\SiteBuilderContracts.csproj" />
       <ProjectReference Include="..\WebRefreshSiteBuilderAPI\WebRefreshSiteBuilderAPI.csproj" />
     </ItemGroup>

@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiBase", "..\31-07-26\ApiBase\ApiBase.csproj", "{F102FC2C-1B20-421E-BED1-29EBBE7DA079}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiBase", "ApiBase\ApiBase.csproj", "{F102FC2C-1B20-421E-BED1-29EBBE7DA079}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebRefreshSiteBuilderAPI", "WebRefreshSiteBuilderAPI\WebRefreshSiteBuilderAPI.csproj", "{8DF6453B-9276-4328-B35F-E68C0EAA6D8E}"
 EndProject

@@ -29,7 +29,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..s\ApiBase\ApiBase.csproj" />
+      <ProjectReference Include="..\ApiBase\ApiBase.csproj" />
       <ProjectReference Include="..\SiteBuilderContracts\SiteBuilderContracts.csproj" />
     </ItemGroup>
 
