@@ -18,6 +18,18 @@ ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./WebRefreshSiteBuilderAPI.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
+USER root
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+# The .NET package ships the Playwright driver but not a browser. Install the
+# Chromium revision matching Microsoft.Playwright plus its Debian dependencies
+# during the image build. A fixed path lets the non-root application user find
+# the browser at runtime.
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+RUN node_path="$(find .playwright/node -type f -name node -print -quit)" \
+    && test -n "$node_path" \
+    && "$node_path" .playwright/package/cli.js install --with-deps chromium
+
+USER $APP_UID
 ENTRYPOINT ["dotnet", "WebRefreshSiteBuilderAPI.dll"]

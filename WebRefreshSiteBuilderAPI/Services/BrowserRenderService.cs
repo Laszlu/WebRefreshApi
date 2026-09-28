@@ -10,7 +10,11 @@ public sealed class BrowserRenderService
     public BrowserRenderService(ILogger<BrowserRenderService> logger) => _logger = logger;
 
     public async Task<BrowserRenderResult> RenderRemoteAsync(string url, CancellationToken ct = default) =>
-        await RenderAsync(async page => await page.GotoAsync(url, new() { WaitUntil = WaitUntilState.NetworkIdle, Timeout = 20_000 }), ct);
+        // Many production sites keep analytics, polling, or websocket requests
+        // open indefinitely. DOMContentLoaded is sufficient for the screenshot
+        // and layout evidence and avoids treating that normal behaviour as a
+        // missing-browser error.
+        await RenderAsync(async page => await page.GotoAsync(url, new() { WaitUntil = WaitUntilState.DOMContentLoaded, Timeout = 20_000 }), ct);
 
     public async Task<BrowserRenderResult> RenderFilesAsync(IEnumerable<SiteFile> files, CancellationToken ct = default)
     {
@@ -25,7 +29,7 @@ public sealed class BrowserRenderService
         var document = html.Content.Replace("</head>", $"<style>{css}</style></head>", StringComparison.OrdinalIgnoreCase)
             .Replace("</body>", $"<script>{js}</script></body>", StringComparison.OrdinalIgnoreCase);
         
-        return await RenderAsync(async page => await page.SetContentAsync(document, new() { WaitUntil = WaitUntilState.NetworkIdle }), ct);
+        return await RenderAsync(async page => await page.SetContentAsync(document, new() { WaitUntil = WaitUntilState.DOMContentLoaded }), ct);
     }
 
     private async Task<BrowserRenderResult> RenderAsync(Func<IPage, Task> load, CancellationToken ct)
@@ -46,11 +50,20 @@ public sealed class BrowserRenderService
             
             return new BrowserRenderResult { ScreenshotBase64 = Convert.ToBase64String(screenshot), Layout = layout.ToList() };
         }
-        catch (Exception ex) when (ex is PlaywrightException or FileNotFoundException)
+        catch (PlaywrightException ex) when (ex.Message.Contains("Executable doesn't exist", StringComparison.OrdinalIgnoreCase))
         {
             _logger.LogWarning(ex, "Browser render unavailable");
-            
             return new BrowserRenderResult { Error = "Browser render unavailable. Install Playwright Chromium with 'playwright install chromium'." };
+        }
+        catch (PlaywrightException ex)
+        {
+            _logger.LogWarning(ex, "Browser navigation or rendering failed");
+            return new BrowserRenderResult { Error = $"Browser render failed: {ex.Message}" };
+        }
+        catch (FileNotFoundException ex)
+        {
+            _logger.LogWarning(ex, "Browser render driver is unavailable");
+            return new BrowserRenderResult { Error = $"Browser render driver is unavailable: {ex.Message}" };
         }
     }
 }
